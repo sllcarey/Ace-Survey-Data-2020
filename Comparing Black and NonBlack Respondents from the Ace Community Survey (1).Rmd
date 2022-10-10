@@ -1,0 +1,1085 @@
+---
+title: "R Notebook"
+output:
+  pdf_document: default
+  html_document:
+    df_print: paged
+---
+```{r Installing Libraries and Data}
+
+#Imported data received from Ace Survey Team
+install.packages("readr")
+install.packages("tidyr")
+install.packages("dplyr")
+install.packages("ggplot2")
+install.packages("tidyverse")
+library("readr")
+library("tidyr")
+library("dplyr")
+library("ggplot2")
+library("tidyverse")
+AceSurvey2020_data <- read_csv("AceSurvey2020_data.csv")
+View(AceSurvey2020_data)
+
+```
+```{r Separating Categories}
+
+
+
+###Separating Categories
+#Separating black and nonblack ace respondents
+
+BlackAceRespondents <- dplyr::filter(AceSurvey2020_data, grepl('Black', raceCB) & grepl('Yes', acespec))
+
+NonBlackAceRespondents <- dplyr::filter(AceSurvey2020_data, !grepl('Black', raceCB) & grepl('Yes', acespec))
+```
+```{r Level of Outness}
+
+###Level of Outness
+##outPartners
+#Comparing the number of out respondents (each Category)
+
+BlackAceRespondents_OutPartners <- BlackAceRespondents %>%
+     group_by(outPartners) %>% 
+    tally()
+
+NonBlackAceRespondents_OutPartners <- NonBlackAceRespondents %>%
+         group_by(outPartners) %>% 
+         tally()
+
+OutPartners <- merge(NonBlackAceRespondents_OutPartners, BlackAceRespondents_OutPartners, by = 'outPartners')
+
+OutPartners <- OutPartners %>% 
+     rename("Nonblack Respondents" = "n.x"," Black Respondents" = "n.y")
+
+#Removing non-responses and converting to percentages
+
+OutPartners<-subset(OutPartners, outPartners!="N/A" & outPartners!="")
+
+OutPartners$NonBlack_Percentage= 100*(OutPartners$`Nonblack Respondents`/sum(OutPartners$'Nonblack Respondents'))
+
+#Error Fix
+OutPartners <- OutPartners %>% 
+rename("Black Respondents" = " Black Respondents")
+
+OutPartners$Black_Percentage= 100*(OutPartners$`Black Respondents`/sum(OutPartners$'Black Respondents'))
+
+#Ordering the Columns
+column_order <- c(2, 4, 3, 1)
+OutPartners$column_order <- column_order
+
+OutPartners <- OutPartners %>% 
+arrange(column_order)
+
+#Organizing Data using Gather
+OutPartners_Gathered <- OutPartners %>%
+gather('NonBlack_Percentage','Black_Percentage',key='Respondent_Group',value='Percentage')
+
+#Make a Graph
+positions <- c("None", "A few", "Most", "All")
+
+OutPartnersGraph <- ggplot(OutPartners_Gathered, aes(fill=Respondent_Group, y=Percentage,  x= outPartners)) + 
+    geom_bar(position="dodge", stat="identity") + 
+scale_fill_manual(values=c("purple",
+                               "grey"), labels=c('Black Respondents', 'Non-Black Respondents')) + 
+labs(x= "Out to Partners") + 
+guides(fill=guide_legend(title="Respondent Group")) + 
+scale_x_discrete(limits = positions) + 
+geom_text(aes(label=abbreviate(Percentage)
+), position=position_dodge(width=0.9), vjust=-0.25)+
+ggtitle("Percentage of Respondents Out to Partners") +
+ylim(0, 85)
+##outExPartners
+#Comparing the number of out respondents (each Category)
+
+BlackAceRespondents_OutExPartners <- BlackAceRespondents %>%
+     group_by(outExPartners) %>% 
+    tally()
+
+NonBlackAceRespondents_OutExPartners <- NonBlackAceRespondents %>%
+         group_by(outExPartners) %>% 
+         tally()
+
+OutExPartners <- merge(NonBlackAceRespondents_OutExPartners, BlackAceRespondents_OutExPartners, by = 'outExPartners')
+
+OutExPartners <- OutExPartners %>% 
+     rename("Nonblack Respondents" = "n.x"," Black Respondents" = "n.y")
+
+#Removing non-responses and converting to percentages
+
+OutExPartners<-subset(OutExPartners, outExPartners!="N/A" & outExPartners!="")
+
+OutExPartners$NonBlack_Percentage= 100*(OutExPartners$`Nonblack Respondents`/sum(OutExPartners$'Nonblack Respondents'))
+
+#Error Fix
+OutExPartners <- OutExPartners %>% 
+rename("Black Respondents" = " Black Respondents")
+
+OutExPartners$Black_Percentage= 100*(OutExPartners$`Black Respondents`/sum(OutExPartners$'Black Respondents'))
+
+#Ordering the Columns
+column_order <- c(2, 4, 3, 1)
+OutExPartners$column_order <- column_order
+
+OutExPartners <- OutExPartners %>% 
+arrange(column_order)
+
+#Organizing Data using Gather
+OutExPartners_Gathered <- OutExPartners %>%
+gather('NonBlack_Percentage','Black_Percentage',key='Respondent_Group',value='Percentage')
+
+#Make a Graph
+positions <- c("None", "A few", "Most", "All")
+
+OutExPartnersGraph <- ggplot(OutExPartners_Gathered, aes(fill=Respondent_Group, y=Percentage,  x= outExPartners)) + 
+    geom_bar(position="dodge", stat="identity") + 
+scale_fill_manual(values=c("purple",
+                               "grey"), labels=c('Black Respondents', 'Non-Black Respondents')) + 
+labs(x= "Out to Ex-Partners") + 
+guides(fill=guide_legend(title="Respondent Group")) + 
+scale_x_discrete(limits = positions) + 
+geom_text(aes(label=abbreviate(Percentage)
+), position=position_dodge(width=0.9), vjust=-0.25)+
+ggtitle("Percentage of Respondents Out to Ex-Partners") +
+ylim(0, 85)
+
+##outParents
+#Comparing the number of out respondents (each Category)
+
+BlackAceRespondents_OutParents <- BlackAceRespondents %>%
+     group_by(outParents) %>% 
+    tally()
+
+NonBlackAceRespondents_OutParents <- NonBlackAceRespondents %>%
+         group_by(outParents) %>% 
+         tally()
+
+OutParents <- merge(NonBlackAceRespondents_OutParents, BlackAceRespondents_OutParents, by = 'outParents')
+
+OutParents <- OutParents %>% 
+     rename("Nonblack Respondents" = "n.x"," Black Respondents" = "n.y")
+
+#Removing non-responses and converting to percentages
+
+OutParents<-subset(OutParents, outParents!="N/A" & outParents!="")
+
+OutParents$NonBlack_Percentage= 100*(OutParents$`Nonblack Respondents`/sum(OutParents$'Nonblack Respondents'))
+
+#Error Fix
+OutParents <- OutParents %>% 
+rename("Black Respondents" = " Black Respondents")
+
+OutParents$Black_Percentage= 100*(OutParents$`Black Respondents`/sum(OutParents$'Black Respondents'))
+
+#Ordering the Columns
+column_order <- c(2, 4, 3, 1)
+OutParents$column_order <- column_order
+
+OutParents <- OutParents %>% 
+arrange(column_order)
+
+#Organizing Data using Gather
+OutParents_Gathered <- OutParents %>%
+gather('NonBlack_Percentage','Black_Percentage',key='Respondent_Group',value='Percentage')
+
+#Make a Graph
+positions <- c("None", "A few", "Most", "All")
+
+OutParentsGraph <- ggplot(OutParents_Gathered, aes(fill=Respondent_Group, y=Percentage,  x= outParents)) + 
+    geom_bar(position="dodge", stat="identity") + 
+scale_fill_manual(values=c("purple",
+                               "grey"), labels=c('Black Respondents', 'Non-Black Respondents')) + 
+labs(x= "Out to Parents") + 
+guides(fill=guide_legend(title="Respondent Group")) + 
+scale_x_discrete(limits = positions) + 
+geom_text(aes(label=abbreviate(Percentage)
+), position=position_dodge(width=0.9), vjust=-0.25)+
+ggtitle("Percentage of Respondents Out to Parents") +
+ylim(0, 85)
+
+##outOtherFam
+#Comparing the number of out respondents (each Category)
+
+BlackAceRespondents_OutOtherFam <- BlackAceRespondents %>%
+     group_by(outOtherFam) %>% 
+    tally()
+
+NonBlackAceRespondents_OutOtherFam <- NonBlackAceRespondents %>%
+         group_by(outOtherFam) %>% 
+         tally()
+
+OutOtherFam <- merge(NonBlackAceRespondents_OutOtherFam, BlackAceRespondents_OutOtherFam, by = 'outOtherFam')
+
+OutOtherFam <- OutOtherFam %>% 
+     rename("Nonblack Respondents" = "n.x"," Black Respondents" = "n.y")
+
+#Removing non-responses and converting to percentages
+
+OutOtherFam<-subset(OutOtherFam, outOtherFam!="N/A" & outOtherFam!="")
+
+OutOtherFam$NonBlack_Percentage= 100*(OutOtherFam$`Nonblack Respondents`/sum(OutOtherFam$'Nonblack Respondents'))
+
+#Error Fix
+OutOtherFam <- OutOtherFam %>% 
+rename("Black Respondents" = " Black Respondents")
+
+OutOtherFam$Black_Percentage= 100*(OutOtherFam$`Black Respondents`/sum(OutOtherFam$'Black Respondents'))
+
+#Ordering the Columns
+column_order <- c(2, 4, 3, 1)
+OutOtherFam$column_order <- column_order
+
+OutOtherFam <- OutOtherFam %>% 
+arrange(column_order)
+
+#Organizing Data using Gather
+OutOtherFam_Gathered <- OutOtherFam %>%
+gather('NonBlack_Percentage','Black_Percentage',key='Respondent_Group',value='Percentage')
+
+#Make a Graph
+positions <- c("None", "A few", "Most", "All")
+
+OutOtherFamGraph <- ggplot(OutOtherFam_Gathered, aes(fill=Respondent_Group, y=Percentage,  x= outOtherFam)) + 
+    geom_bar(position="dodge", stat="identity") + 
+scale_fill_manual(values=c("purple",
+                               "grey"), labels=c('Black Respondents', 'Non-Black Respondents')) + 
+labs(x= "Out to Other Family") + 
+guides(fill=guide_legend(title="Respondent Group")) + 
+scale_x_discrete(limits = positions) + 
+geom_text(aes(label=abbreviate(Percentage)
+), position=position_dodge(width=0.9), vjust=-0.25)+
+ggtitle("Percentage of Respondents Out to Other Family") +
+ylim(0, 85)
+
+
+##outHouse
+#Comparing the number of out respondents (each Category)
+
+BlackAceRespondents_OutHouse <- BlackAceRespondents %>%
+     group_by(outHouse) %>% 
+    tally()
+
+NonBlackAceRespondents_OutHouse <- NonBlackAceRespondents %>%
+         group_by(outHouse) %>% 
+         tally()
+
+OutHouse <- merge(NonBlackAceRespondents_OutHouse, BlackAceRespondents_OutHouse, by = 'outHouse')
+
+OutHouse <- OutHouse %>% 
+     rename("Nonblack Respondents" = "n.x"," Black Respondents" = "n.y")
+
+#Removing non-responses and converting to percentages
+
+OutHouse<-subset(OutHouse, outHouse!="N/A" & outHouse!="")
+
+OutHouse$NonBlack_Percentage= 100*(OutHouse$`Nonblack Respondents`/sum(OutHouse$'Nonblack Respondents'))
+
+#Error Fix
+OutHouse <- OutHouse %>% 
+rename("Black Respondents" = " Black Respondents")
+
+OutHouse$Black_Percentage= 100*(OutHouse$`Black Respondents`/sum(OutHouse$'Black Respondents'))
+
+#Ordering the Columns
+column_order <- c(2, 4, 3, 1)
+OutHouse$column_order <- column_order
+
+OutHouse <- OutHouse %>% 
+arrange(column_order)
+
+#Organizing Data using Gather
+OutHouse_Gathered <- OutHouse %>%
+gather('NonBlack_Percentage','Black_Percentage',key='Respondent_Group',value='Percentage')
+
+#Make a Graph
+positions <- c("None", "A few", "Most", "All")
+
+OutHouseGraph <- ggplot(OutHouse_Gathered, aes(fill=Respondent_Group, y=Percentage,  x= outHouse)) + 
+    geom_bar(position="dodge", stat="identity") + 
+scale_fill_manual(values=c("purple",
+                               "grey"), labels=c('Black Respondents', 'Non-Black Respondents')) + 
+labs(x= "Out to Members of their Household") + 
+guides(fill=guide_legend(title="Respondent Group")) + 
+scale_x_discrete(limits = positions) + 
+geom_text(aes(label=abbreviate(Percentage)
+), position=position_dodge(width=0.9), vjust=-0.25)+
+ggtitle("Percentage of Respondents Out to Members of their Household") +
+ylim(0, 85)
+##outHet
+#Comparing the number of out respondents (each Category)
+
+BlackAceRespondents_OutHet <- BlackAceRespondents %>%
+     group_by(outHet) %>% 
+    tally()
+
+NonBlackAceRespondents_OutHet <- NonBlackAceRespondents %>%
+         group_by(outHet) %>% 
+         tally()
+
+OutHet <- merge(NonBlackAceRespondents_OutHet, BlackAceRespondents_OutHet, by = 'outHet')
+
+OutHet <- OutHet %>% 
+     rename("Nonblack Respondents" = "n.x"," Black Respondents" = "n.y")
+
+#Removing non-responses and converting to percentages
+
+OutHet<-subset(OutHet, outHet!="N/A" & outHet!="")
+
+OutHet$NonBlack_Percentage= 100*(OutHet$`Nonblack Respondents`/sum(OutHet$'Nonblack Respondents'))
+
+#Error Fix
+OutHet <- OutHet %>% 
+rename("Black Respondents" = " Black Respondents")
+
+OutHet$Black_Percentage= 100*(OutHet$`Black Respondents`/sum(OutHet$'Black Respondents'))
+
+#Ordering the Columns
+column_order <- c(2, 4, 3, 1)
+OutHet$column_order <- column_order
+
+OutHet <- OutHet %>% 
+arrange(column_order)
+
+#Organizing Data using Gather
+OutHet_Gathered <- OutHet %>%
+gather('NonBlack_Percentage','Black_Percentage',key='Respondent_Group',value='Percentage')
+
+#Make a Graph
+positions <- c("None", "A few", "Most", "All")
+
+OutHetGraph <- ggplot(OutHet_Gathered, aes(fill=Respondent_Group, y=Percentage,  x= outHet)) + 
+    geom_bar(position="dodge", stat="identity") + 
+scale_fill_manual(values=c("purple",
+                               "grey"), labels=c('Black Respondents', 'Non-Black Respondents')) + 
+labs(x= "Out to Heterosexual Friends") + 
+guides(fill=guide_legend(title="Respondent Group")) + 
+scale_x_discrete(limits = positions) + 
+geom_text(aes(label=abbreviate(Percentage)
+), position=position_dodge(width=0.9), vjust=-0.25)+
+ggtitle("Percentage of Respondents Out to Heterosexual Friends") +
+ylim(0, 85)
+##outNonHet
+#Comparing the number of out respondents (each Category)
+
+BlackAceRespondents_OutNonHet <- BlackAceRespondents %>%
+     group_by(outNonHet) %>% 
+    tally()
+
+NonBlackAceRespondents_OutNonHet <- NonBlackAceRespondents %>%
+         group_by(outNonHet) %>% 
+         tally()
+
+OutNonHet <- merge(NonBlackAceRespondents_OutNonHet, BlackAceRespondents_OutNonHet, by = 'outNonHet')
+
+OutNonHet <- OutNonHet %>% 
+     rename("Nonblack Respondents" = "n.x"," Black Respondents" = "n.y")
+
+#Removing non-responses and converting to percentages
+
+OutNonHet<-subset(OutNonHet, outNonHet!="N/A" & outNonHet!="")
+
+OutNonHet$NonBlack_Percentage= 100*(OutNonHet$`Nonblack Respondents`/sum(OutNonHet$'Nonblack Respondents'))
+
+#Error Fix
+OutNonHet <- OutNonHet %>% 
+rename("Black Respondents" = " Black Respondents")
+
+OutNonHet$Black_Percentage= 100*(OutNonHet$`Black Respondents`/sum(OutNonHet$'Black Respondents'))
+
+#Ordering the Columns
+column_order <- c(2, 4, 3, 1)
+OutNonHet$column_order <- column_order
+
+OutNonHet <- OutNonHet %>% 
+arrange(column_order)
+
+#Organizing Data using Gather
+OutNonHet_Gathered <- OutNonHet %>%
+gather('NonBlack_Percentage','Black_Percentage',key='Respondent_Group',value='Percentage')
+
+#Make a Graph
+positions <- c("None", "A few", "Most", "All")
+
+OutNonHetGraph <- ggplot(OutNonHet_Gathered, aes(fill=Respondent_Group, y=Percentage,  x= outNonHet)) + 
+    geom_bar(position="dodge", stat="identity") + 
+scale_fill_manual(values=c("purple",
+                               "grey"), labels=c('Black Respondents', 'Non-Black Respondents')) + 
+labs(x= "Out to Non-Heterosexual Friends") + 
+guides(fill=guide_legend(title="Respondent Group")) + 
+scale_x_discrete(limits = positions) + 
+geom_text(aes(label=abbreviate(Percentage)
+), position=position_dodge(width=0.9), vjust=-0.25)+
+ggtitle("Percentage of Respondents Out to Non-Heterosexual Friends") +
+ylim(0, 85)
+##outClassmates
+
+#Comparing the number of out respondents (each Category)
+
+BlackAceRespondents_OutClassmates <- BlackAceRespondents %>%
+     group_by(outClassmates) %>% 
+    tally()
+
+NonBlackAceRespondents_OutClassmates <- NonBlackAceRespondents %>%
+         group_by(outClassmates) %>% 
+         tally()
+
+OutClassmates <- merge(NonBlackAceRespondents_OutClassmates, BlackAceRespondents_OutClassmates, by = 'outClassmates')
+
+OutClassmates <- OutClassmates %>% 
+     rename("Nonblack Respondents" = "n.x"," Black Respondents" = "n.y")
+
+#Removing non-responses and converting to percentages
+
+OutClassmates<-subset(OutClassmates, outClassmates!="N/A" & outClassmates!="")
+
+OutClassmates$NonBlack_Percentage= 100*(OutClassmates$`Nonblack Respondents`/sum(OutClassmates$'Nonblack Respondents'))
+
+#Error Fix
+OutClassmates <- OutClassmates %>% 
+rename("Black Respondents" = " Black Respondents")
+
+OutClassmates$Black_Percentage= 100*(OutClassmates$`Black Respondents`/sum(OutClassmates$'Black Respondents'))
+
+#Ordering the Columns
+column_order <- c(2, 4, 3, 1)
+OutClassmates$column_order <- column_order
+
+OutClassmates <- OutClassmates %>% 
+arrange(column_order)
+
+#Organizing Data using Gather
+OutClassmates_Gathered <- OutClassmates %>%
+gather('NonBlack_Percentage','Black_Percentage',key='Respondent_Group',value='Percentage')
+
+#Make a Graph
+positions <- c("None", "A few", "Most", "All")
+
+OutClassmatesGraph <- ggplot(OutClassmates_Gathered, aes(fill=Respondent_Group, y=Percentage,  x= outClassmates)) + 
+    geom_bar(position="dodge", stat="identity") + 
+scale_fill_manual(values=c("purple",
+                               "grey"), labels=c('Black Respondents', 'Non-Black Respondents')) + 
+labs(x= "Out to Classmates") + 
+guides(fill=guide_legend(title="Respondent Group")) + 
+scale_x_discrete(limits = positions) + 
+geom_text(aes(label=abbreviate(Percentage)
+), position=position_dodge(width=0.9), vjust=-0.25)+
+ggtitle("Percentage of Respondents Out to Classmates") +
+ylim(0, 85)
+##outTeachers
+#Comparing the number of out respondents (each Category)
+
+BlackAceRespondents_OutTeachers <- BlackAceRespondents %>%
+     group_by(outTeachers) %>% 
+    tally()
+
+NonBlackAceRespondents_OutTeachers <- NonBlackAceRespondents %>%
+         group_by(outTeachers) %>% 
+         tally()
+
+OutTeachers <- merge(NonBlackAceRespondents_OutTeachers, BlackAceRespondents_OutTeachers, by = 'outTeachers')
+
+OutTeachers <- OutTeachers %>% 
+     rename("Nonblack Respondents" = "n.x"," Black Respondents" = "n.y")
+
+#Removing non-responses and converting to percentages
+
+OutTeachers<-subset(OutTeachers, outTeachers!="N/A" & outTeachers!="")
+
+OutTeachers$NonBlack_Percentage= 100*(OutTeachers$`Nonblack Respondents`/sum(OutTeachers$'Nonblack Respondents'))
+
+#Error Fix
+OutTeachers <- OutTeachers %>% 
+rename("Black Respondents" = " Black Respondents")
+
+OutTeachers$Black_Percentage= 100*(OutTeachers$`Black Respondents`/sum(OutTeachers$'Black Respondents'))
+
+#Ordering the Columns
+column_order <- c(2, 4, 3, 1)
+OutTeachers$column_order <- column_order
+
+OutTeachers <- OutTeachers %>% 
+arrange(column_order)
+
+#Organizing Data using Gather
+OutTeachers_Gathered <- OutTeachers %>%
+gather('NonBlack_Percentage','Black_Percentage',key='Respondent_Group',value='Percentage')
+
+#Make a Graph
+positions <- c("None", "A few", "Most", "All")
+
+OutTeachersGraph <- ggplot(OutTeachers_Gathered, aes(fill=Respondent_Group, y=Percentage,  x= outTeachers)) + 
+    geom_bar(position="dodge", stat="identity") + 
+scale_fill_manual(values=c("purple",
+                               "grey"), labels=c('Black Respondents', 'Non-Black Respondents')) + 
+labs(x= "Out to Teachers") + 
+guides(fill=guide_legend(title="Respondent Group")) + 
+scale_x_discrete(limits = positions) + 
+geom_text(aes(label=abbreviate(Percentage)
+), position=position_dodge(width=0.9), vjust=-0.25)+
+ggtitle("Percentage of Respondents Out to Teachers") +
+ylim(0, 85)
+##outCoworkers
+#Comparing the number of out respondents (each Category)
+
+BlackAceRespondents_OutCoworkers <- BlackAceRespondents %>%
+     group_by(outCoworkers) %>% 
+    tally()
+
+NonBlackAceRespondents_OutCoworkers <- NonBlackAceRespondents %>%
+         group_by(outCoworkers) %>% 
+         tally()
+
+OutCoworkers <- merge(NonBlackAceRespondents_OutCoworkers, BlackAceRespondents_OutCoworkers, by = 'outCoworkers')
+
+OutCoworkers <- OutCoworkers %>% 
+     rename("Nonblack Respondents" = "n.x"," Black Respondents" = "n.y")
+
+#Removing non-responses and converting to percentages
+
+OutCoworkers<-subset(OutCoworkers, outCoworkers!="N/A" & outCoworkers!="")
+
+OutCoworkers$NonBlack_Percentage= 100*(OutCoworkers$`Nonblack Respondents`/sum(OutCoworkers$'Nonblack Respondents'))
+
+#Error Fix
+OutCoworkers <- OutCoworkers %>% 
+rename("Black Respondents" = " Black Respondents")
+
+OutCoworkers$Black_Percentage= 100*(OutCoworkers$`Black Respondents`/sum(OutCoworkers$'Black Respondents'))
+
+#Ordering the Columns
+column_order <- c(2, 4, 3, 1)
+OutCoworkers$column_order <- column_order
+
+OutCoworkers <- OutCoworkers %>% 
+arrange(column_order)
+
+#Organizing Data using Gather
+OutCoworkers_Gathered <- OutCoworkers %>%
+gather('NonBlack_Percentage','Black_Percentage',key='Respondent_Group',value='Percentage')
+
+#Make a Graph
+positions <- c("None", "A few", "Most", "All")
+
+OutCoworkersGraph <- ggplot(OutCoworkers_Gathered, aes(fill=Respondent_Group, y=Percentage,  x= outCoworkers)) + 
+    geom_bar(position="dodge", stat="identity") + 
+scale_fill_manual(values=c("purple",
+                               "grey"), labels=c('Black Respondents', 'Non-Black Respondents')) + 
+labs(x= "Out to Coworkers") + 
+guides(fill=guide_legend(title="Respondent Group")) + 
+scale_x_discrete(limits = positions) + 
+geom_text(aes(label=abbreviate(Percentage)
+), position=position_dodge(width=0.9), vjust=-0.25)+
+ggtitle("Percentage of Respondents Out to Coworkers") +
+ylim(0, 85)
+
+##outCounselor
+#Comparing the number of out respondents (each Category)
+
+BlackAceRespondents_OutCounselor <- BlackAceRespondents %>%
+     group_by(outCounselor) %>% 
+    tally()
+
+NonBlackAceRespondents_OutCounselor <- NonBlackAceRespondents %>%
+         group_by(outCounselor) %>% 
+         tally()
+
+OutCounselor <- merge(NonBlackAceRespondents_OutCounselor, BlackAceRespondents_OutCounselor, by = 'outCounselor')
+
+OutCounselor <- OutCounselor %>% 
+     rename("Nonblack Respondents" = "n.x"," Black Respondents" = "n.y")
+
+#Removing non-responses and converting to percentages
+
+OutCounselor<-subset(OutCounselor, outCounselor!="N/A" & outCounselor!="")
+
+OutCounselor$NonBlack_Percentage= 100*(OutCounselor$`Nonblack Respondents`/sum(OutCounselor$'Nonblack Respondents'))
+
+#Error Fix
+OutCounselor <- OutCounselor %>% 
+rename("Black Respondents" = " Black Respondents")
+
+OutCounselor$Black_Percentage= 100*(OutCounselor$`Black Respondents`/sum(OutCounselor$'Black Respondents'))
+
+#Ordering the Columns
+column_order <- c(2, 4, 3, 1)
+OutCounselor$column_order <- column_order
+
+OutCounselor <- OutCounselor %>% 
+arrange(column_order)
+
+#Organizing Data using Gather
+OutCounselor_Gathered <- OutCounselor %>%
+gather('NonBlack_Percentage','Black_Percentage',key='Respondent_Group',value='Percentage')
+
+#Make a Graph
+positions <- c("None", "A few", "Most", "All")
+
+OutCounselorGraph <- ggplot(OutCounselor_Gathered, aes(fill=Respondent_Group, y=Percentage,  x= outCounselor)) + 
+    geom_bar(position="dodge", stat="identity") + 
+scale_fill_manual(values=c("purple",
+                               "grey"), labels=c('Black Respondents', 'Non-Black Respondents')) + 
+labs(x= "Out to Counselor") + 
+guides(fill=guide_legend(title="Respondent Group")) + 
+scale_x_discrete(limits = positions) + 
+geom_text(aes(label=abbreviate(Percentage)
+), position=position_dodge(width=0.9), vjust=-0.25)+
+ggtitle("Percentage of Respondents Out to Counselor") +
+ylim(0, 85)
+
+##outMedical
+
+#Comparing the number of out respondents (each Category)
+
+BlackAceRespondents_OutMedical <- BlackAceRespondents %>%
+     group_by(outMedical) %>% 
+    tally()
+
+NonBlackAceRespondents_OutMedical <- NonBlackAceRespondents %>%
+         group_by(outMedical) %>% 
+         tally()
+
+OutMedical <- merge(NonBlackAceRespondents_OutMedical, BlackAceRespondents_OutMedical, by = 'outMedical')
+
+OutMedical <- OutMedical %>% 
+     rename("Nonblack Respondents" = "n.x"," Black Respondents" = "n.y")
+
+#Removing non-responses and converting to percentages
+
+OutMedical<-subset(OutMedical, outMedical!="N/A" & outMedical!="")
+
+OutMedical$NonBlack_Percentage= 100*(OutMedical$`Nonblack Respondents`/sum(OutMedical$'Nonblack Respondents'))
+
+#Error Fix
+OutMedical <- OutMedical %>% 
+rename("Black Respondents" = " Black Respondents")
+
+OutMedical$Black_Percentage= 100*(OutMedical$`Black Respondents`/sum(OutMedical$'Black Respondents'))
+
+#Ordering the Columns
+column_order <- c(2, 4, 3, 1)
+OutMedical$column_order <- column_order
+
+OutMedical <- OutMedical %>% 
+arrange(column_order)
+
+#Organizing Data using Gather
+OutMedical_Gathered <- OutMedical %>%
+gather('NonBlack_Percentage','Black_Percentage',key='Respondent_Group',value='Percentage')
+
+#Make a Graph
+positions <- c("None", "A few", "Most", "All")
+
+OutMedicalGraph <- ggplot(OutMedical_Gathered, aes(fill=Respondent_Group, y=Percentage,  x= outMedical)) + 
+    geom_bar(position="dodge", stat="identity") + 
+scale_fill_manual(values=c("purple",
+                               "grey"), labels=c('Black Respondents', 'Non-Black Respondents')) + 
+labs(x= "Out to Medical Professionals") + 
+guides(fill=guide_legend(title="Respondent Group")) + 
+scale_x_discrete(limits = positions) + 
+geom_text(aes(label=abbreviate(Percentage)
+), position=position_dodge(width=0.9), vjust=-0.25)+
+ggtitle("Percentage of Respondents Out to Medical Professionals") +
+ylim(0, 85)
+```
+```{r Reasons for Not Being Out}
+
+
+
+###Reasons for Not Being Out
+##notOutLegal : There are legal consequences in my country.
+#Count responses
+
+NotOutLegalBlackRespondents <- BlackAceRespondents %>% 
+    count(notOutLegal)
+
+NotOutLegalBlackRespondents <- NotOutLegalBlackRespondents %>% 
+    rename("NotOutLegal" = "n", "Frequency" = "notOutLegal")
+
+NotOutLegalNonBlackRespondents <- NonBlackAceRespondents %>% 
+    count(notOutLegal)
+
+NotOutLegalNonBlackRespondents <- NotOutLegalNonBlackRespondents %>% 
+    rename("NotOutLegal" = "n", "Frequency" = "notOutLegal")
+
+
+#Remove blank responses
+NotOutLegalBlackRespondents <- subset(NotOutLegalBlackRespondents, Frequency!="NA" & Frequency!="")
+
+NotOutLegalNonBlackRespondents <- subset(NotOutLegalNonBlackRespondents, Frequency!="NA" & Frequency!="")
+
+#Merge the two tables and rename the columns
+NotOutLegal <- merge(NotOutLegalBlackRespondents, NotOutLegalNonBlackRespondents, by = 'Frequency')
+
+NotOutLegal <- NotOutLegal %>% rename("Black Respondents" = "NotOutLegal.x", "NonBlack Respondents" = "NotOutLegal.y")
+
+
+#Convert to Percentages
+
+NotOutLegal$NonBlack_Percentage= 100*(NotOutLegal$'NonBlack Respondents'/sum(NotOutLegal$'NonBlack Respondents'))
+
+NotOutLegal$Black_Percentage= 100*(NotOutLegal$'Black Respondents'/sum(NotOutLegal$'Black Respondents'))
+
+#Gather the data
+
+NotOutLegal_Gathered <- NotOutLegal %>%
+gather('NonBlack_Percentage','Black_Percentage',key='Respondent_Group',value='Percentage')
+
+#Assign Reason
+
+NotOutLegal_Gathered$Reason <- c("NotOutLegal", "NotOutLegal", "NotOutLegal", "NotOutLegal")
+
+##notOutUnaccept : It's not acceptable in my country, community, family, workplace, or religious group.
+#Count responses
+
+NotOutUnacceptBlackRespondents <- BlackAceRespondents %>% 
+    count(notOutUnaccept)
+
+NotOutUnacceptBlackRespondents <- NotOutUnacceptBlackRespondents %>% 
+    rename("NotOutUnaccept" = "n", "Frequency" = "notOutUnaccept")
+
+NotOutUnacceptNonBlackRespondents <- NonBlackAceRespondents %>% 
+    count(notOutUnaccept)
+
+NotOutUnacceptNonBlackRespondents <- NotOutUnacceptNonBlackRespondents %>% 
+    rename("NotOutUnaccept" = "n", "Frequency" = "notOutUnaccept")
+
+
+#Remove blank responses
+NotOutUnacceptBlackRespondents <- subset(NotOutUnacceptBlackRespondents, Frequency!="NA" & Frequency!="")
+
+NotOutUnacceptNonBlackRespondents <- subset(NotOutUnacceptNonBlackRespondents, Frequency!="NA" & Frequency!="")
+
+#Merge the two tables and rename the columns
+NotOutUnaccept <- merge(NotOutUnacceptBlackRespondents, NotOutUnacceptNonBlackRespondents, by = 'Frequency')
+
+NotOutUnaccept <- NotOutUnaccept %>% rename("Black Respondents" = "NotOutUnaccept.x", "NonBlack Respondents" = "NotOutUnaccept.y")
+
+
+#Convert to Percentages
+
+NotOutUnaccept$NonBlack_Percentage= 100*(NotOutUnaccept$'NonBlack Respondents'/sum(NotOutUnaccept$'NonBlack Respondents'))
+
+NotOutUnaccept$Black_Percentage= 100*(NotOutUnaccept$'Black Respondents'/sum(NotOutUnaccept$'Black Respondents'))
+
+#Gather the data
+
+NotOutUnaccept_Gathered <- NotOutUnaccept %>%
+gather('NonBlack_Percentage','Black_Percentage',key='Respondent_Group',value='Percentage')
+#Assign Reason
+
+NotOutUnaccept_Gathered$Reason <- c("NotOutUnaccept", "NotOutUnaccept", "NotOutUnaccept", "NotOutUnaccept")
+##notOutAfraid : I am afraid of possible negative reactions or repercussions.
+#Count responses
+
+NotOutAfraidBlackRespondents <- BlackAceRespondents %>% 
+    count(notOutAfraid)
+
+NotOutAfraidBlackRespondents <- NotOutAfraidBlackRespondents %>% 
+    rename("NotOutAfraid" = "n", "Frequency" = "notOutAfraid")
+
+NotOutAfraidNonBlackRespondents <- NonBlackAceRespondents %>% 
+    count(notOutAfraid)
+
+NotOutAfraidNonBlackRespondents <- NotOutAfraidNonBlackRespondents %>% 
+    rename("NotOutAfraid" = "n", "Frequency" = "notOutAfraid")
+
+
+#Remove blank responses
+NotOutAfraidBlackRespondents <- subset(NotOutAfraidBlackRespondents, Frequency!="NA" & Frequency!="")
+
+NotOutAfraidNonBlackRespondents <- subset(NotOutAfraidNonBlackRespondents, Frequency!="NA" & Frequency!="")
+
+#Merge the two tables and rename the columns
+NotOutAfraid <- merge(NotOutAfraidBlackRespondents, NotOutAfraidNonBlackRespondents, by = 'Frequency')
+
+NotOutAfraid <- NotOutAfraid %>% rename("Black Respondents" = "NotOutAfraid.x", "NonBlack Respondents" = "NotOutAfraid.y")
+
+
+#Convert to Percentages
+
+NotOutAfraid$NonBlack_Percentage= 100*(NotOutAfraid$'NonBlack Respondents'/sum(NotOutAfraid$'NonBlack Respondents'))
+
+NotOutAfraid$Black_Percentage= 100*(NotOutAfraid$'Black Respondents'/sum(NotOutAfraid$'Black Respondents'))
+
+#Gather the data
+
+NotOutAfraid_Gathered <- NotOutAfraid %>%
+gather('NonBlack_Percentage','Black_Percentage',key='Respondent_Group',value='Percentage')
+#Assign Reason
+
+NotOutAfraid_Gathered$Reason <- c("NotOutAfraid", "NotOutAfraid", "NotOutAfraid", "NotOutAfraid")
+##notOutPrivate : I think my orientation/identity is something private.
+#Count responses
+
+NotOutPrivateBlackRespondents <- BlackAceRespondents %>% 
+    count(notOutPrivate)
+
+NotOutPrivateBlackRespondents <- NotOutPrivateBlackRespondents %>% 
+    rename("NotOutPrivate" = "n", "Frequency" = "notOutPrivate")
+
+NotOutPrivateNonBlackRespondents <- NonBlackAceRespondents %>% 
+    count(notOutPrivate)
+
+NotOutPrivateNonBlackRespondents <- NotOutPrivateNonBlackRespondents %>% 
+    rename("NotOutPrivate" = "n", "Frequency" = "notOutPrivate")
+
+
+#Remove blank responses
+NotOutPrivateBlackRespondents <- subset(NotOutPrivateBlackRespondents, Frequency!="NA" & Frequency!="")
+
+NotOutPrivateNonBlackRespondents <- subset(NotOutPrivateNonBlackRespondents, Frequency!="NA" & Frequency!="")
+
+#Merge the two tables and rename the columns
+NotOutPrivate <- merge(NotOutPrivateBlackRespondents, NotOutPrivateNonBlackRespondents, by = 'Frequency')
+
+NotOutPrivate <- NotOutPrivate %>% rename("Black Respondents" = "NotOutPrivate.x", "NonBlack Respondents" = "NotOutPrivate.y")
+
+
+#Convert to Percentages
+
+NotOutPrivate$NonBlack_Percentage= 100*(NotOutPrivate$'NonBlack Respondents'/sum(NotOutPrivate$'NonBlack Respondents'))
+
+NotOutPrivate$Black_Percentage= 100*(NotOutPrivate$'Black Respondents'/sum(NotOutPrivate$'Black Respondents'))
+
+#Gather the data
+
+NotOutPrivate_Gathered <- NotOutPrivate %>%
+gather('NonBlack_Percentage','Black_Percentage',key='Respondent_Group',value='Percentage')
+#Assign Reason
+
+NotOutPrivate_Gathered$Reason <- c("NotOutPrivate", "NotOutPrivate", "NotOutPrivate", "NotOutPrivate")
+##notOutDislike : I dislike coming out.
+#Count responses
+
+NotOutDislikeBlackRespondents <- BlackAceRespondents %>% 
+    count(notOutDislike)
+
+NotOutDislikeBlackRespondents <- NotOutDislikeBlackRespondents %>% 
+    rename("NotOutDislike" = "n", "Frequency" = "notOutDislike")
+
+NotOutDislikeNonBlackRespondents <- NonBlackAceRespondents %>% 
+    count(notOutDislike)
+
+NotOutDislikeNonBlackRespondents <- NotOutDislikeNonBlackRespondents %>% 
+    rename("NotOutDislike" = "n", "Frequency" = "notOutDislike")
+
+
+#Remove blank responses
+NotOutDislikeBlackRespondents <- subset(NotOutDislikeBlackRespondents, Frequency!="NA" & Frequency!="")
+
+NotOutDislikeNonBlackRespondents <- subset(NotOutDislikeNonBlackRespondents, Frequency!="NA" & Frequency!="")
+
+#Merge the two tables and rename the columns
+NotOutDislike <- merge(NotOutDislikeBlackRespondents, NotOutDislikeNonBlackRespondents, by = 'Frequency')
+
+NotOutDislike <- NotOutDislike %>% rename("Black Respondents" = "NotOutDislike.x", "NonBlack Respondents" = "NotOutDislike.y")
+
+
+#Convert to Percentages
+
+NotOutDislike$NonBlack_Percentage= 100*(NotOutDislike$'NonBlack Respondents'/sum(NotOutDislike$'NonBlack Respondents'))
+
+NotOutDislike$Black_Percentage= 100*(NotOutDislike$'Black Respondents'/sum(NotOutDislike$'Black Respondents'))
+
+#Gather the data
+
+NotOutDislike_Gathered <- NotOutDislike %>%
+gather('NonBlack_Percentage','Black_Percentage',key='Respondent_Group',value='Percentage')
+#Assign Reason
+
+NotOutDislike_Gathered$Reason <- c("NotOutDislike", "NotOutDislike", "NotOutDislike", "NotOutDislike")
+##notOutUnnec : I don't feel like it is necessary.
+#Count responses
+
+NotOutUnnecBlackRespondents <- BlackAceRespondents %>% 
+    count(notOutUnnec)
+
+NotOutUnnecBlackRespondents <- NotOutUnnecBlackRespondents %>% 
+    rename("NotOutUnnec" = "n", "Frequency" = "notOutUnnec")
+
+NotOutUnnecNonBlackRespondents <- NonBlackAceRespondents %>% 
+    count(notOutUnnec)
+
+NotOutUnnecNonBlackRespondents <- NotOutUnnecNonBlackRespondents %>% 
+    rename("NotOutUnnec" = "n", "Frequency" = "notOutUnnec")
+
+
+#Remove blank responses
+NotOutUnnecBlackRespondents <- subset(NotOutUnnecBlackRespondents, Frequency!="NA" & Frequency!="")
+
+NotOutUnnecNonBlackRespondents <- subset(NotOutUnnecNonBlackRespondents, Frequency!="NA" & Frequency!="")
+
+#Merge the two tables and rename the columns
+NotOutUnnec <- merge(NotOutUnnecBlackRespondents, NotOutUnnecNonBlackRespondents, by = 'Frequency')
+
+NotOutUnnec <- NotOutUnnec %>% rename("Black Respondents" = "NotOutUnnec.x", "NonBlack Respondents" = "NotOutUnnec.y")
+
+
+#Convert to Percentages
+
+NotOutUnnec$NonBlack_Percentage= 100*(NotOutUnnec$'NonBlack Respondents'/sum(NotOutUnnec$'NonBlack Respondents'))
+
+NotOutUnnec$Black_Percentage= 100*(NotOutUnnec$'Black Respondents'/sum(NotOutUnnec$'Black Respondents'))
+
+#Gather the data
+
+NotOutUnnec_Gathered <- NotOutUnnec %>%
+gather('NonBlack_Percentage','Black_Percentage',key='Respondent_Group',value='Percentage')
+#Assign Reason
+
+NotOutUnnec_Gathered$Reason <- c("NotOutUnnec", "NotOutUnnec", "NotOutUnnec", "NotOutUnnec")
+
+##notOutQuestioning : I'm still questioning my identity/orientation.
+#Count responses
+
+NotOutQuestioningBlackRespondents <- BlackAceRespondents %>% 
+    count(notOutQuestioning)
+
+NotOutQuestioningBlackRespondents <- NotOutQuestioningBlackRespondents %>% 
+    rename("NotOutQuestioning" = "n", "Frequency" = "notOutQuestioning")
+
+NotOutQuestioningNonBlackRespondents <- NonBlackAceRespondents %>% 
+    count(notOutQuestioning)
+
+NotOutQuestioningNonBlackRespondents <- NotOutQuestioningNonBlackRespondents %>% 
+    rename("NotOutQuestioning" = "n", "Frequency" = "notOutQuestioning")
+
+
+#Remove blank responses
+NotOutQuestioningBlackRespondents <- subset(NotOutQuestioningBlackRespondents, Frequency!="NA" & Frequency!="")
+
+NotOutQuestioningNonBlackRespondents <- subset(NotOutQuestioningNonBlackRespondents, Frequency!="NA" & Frequency!="")
+
+#Merge the two tables and rename the columns
+NotOutQuestioning <- merge(NotOutQuestioningBlackRespondents, NotOutQuestioningNonBlackRespondents, by = 'Frequency')
+
+NotOutQuestioning <- NotOutQuestioning %>% rename("Black Respondents" = "NotOutQuestioning.x", "NonBlack Respondents" = "NotOutQuestioning.y")
+
+
+#Convert to Percentages
+
+NotOutQuestioning$NonBlack_Percentage= 100*(NotOutQuestioning$'NonBlack Respondents'/sum(NotOutQuestioning$'NonBlack Respondents'))
+
+NotOutQuestioning$Black_Percentage= 100*(NotOutQuestioning$'Black Respondents'/sum(NotOutQuestioning$'Black Respondents'))
+
+#Gather the data
+
+NotOutQuestioning_Gathered <- NotOutQuestioning %>%
+gather('NonBlack_Percentage','Black_Percentage',key='Respondent_Group',value='Percentage')
+#Assign Reason
+
+NotOutQuestioning_Gathered$Reason <- c("NotOutQuestioning", "NotOutQuestioning", "NotOutQuestioning", "NotOutQuestioning")
+
+##notOutTime : I haven't found the right time/occasion.
+#Count responses
+
+NotOutTimeBlackRespondents <- BlackAceRespondents %>% 
+    count(notOutTime)
+
+NotOutTimeBlackRespondents <- NotOutTimeBlackRespondents %>% 
+    rename("NotOutTime" = "n", "Frequency" = "notOutTime")
+
+NotOutTimeNonBlackRespondents <- NonBlackAceRespondents %>% 
+    count(notOutTime)
+
+NotOutTimeNonBlackRespondents <- NotOutTimeNonBlackRespondents %>% 
+    rename("NotOutTime" = "n", "Frequency" = "notOutTime")
+
+
+#Remove blank responses
+NotOutTimeBlackRespondents <- subset(NotOutTimeBlackRespondents, Frequency!="NA" & Frequency!="")
+
+NotOutTimeNonBlackRespondents <- subset(NotOutTimeNonBlackRespondents, Frequency!="NA" & Frequency!="")
+
+#Merge the two tables and rename the columns
+NotOutTime <- merge(NotOutTimeBlackRespondents, NotOutTimeNonBlackRespondents, by = 'Frequency')
+
+NotOutTime <- NotOutTime %>% rename("Black Respondents" = "NotOutTime.x", "NonBlack Respondents" = "NotOutTime.y")
+
+
+#Convert to Percentages
+
+NotOutTime$NonBlack_Percentage= 100*(NotOutTime$'NonBlack Respondents'/sum(NotOutTime$'NonBlack Respondents'))
+
+NotOutTime$Black_Percentage= 100*(NotOutTime$'Black Respondents'/sum(NotOutTime$'Black Respondents'))
+
+#Gather the data
+
+NotOutTime_Gathered <- NotOutTime %>%
+gather('NonBlack_Percentage','Black_Percentage',key='Respondent_Group',value='Percentage')
+#Assign Reason
+
+NotOutTime_Gathered$Reason <- c("NotOutTime", "NotOutTime", "NotOutTime", "NotOutTime")
+##notOutNone : N/A - Nothing prevents me from coming out to people.
+
+#Count responses
+
+NotOutNoneBlackRespondents <- BlackAceRespondents %>% 
+    count(notOutNone)
+
+NotOutNoneBlackRespondents <- NotOutNoneBlackRespondents %>% 
+    rename("NotOutNone" = "n", "Frequency" = "notOutNone")
+
+NotOutNoneNonBlackRespondents <- NonBlackAceRespondents %>% 
+    count(notOutNone)
+
+NotOutNoneNonBlackRespondents <- NotOutNoneNonBlackRespondents %>% 
+    rename("NotOutNone" = "n", "Frequency" = "notOutNone")
+
+
+#Remove blank responses
+NotOutNoneBlackRespondents <- subset(NotOutNoneBlackRespondents, Frequency!="NA" & Frequency!="")
+
+NotOutNoneNonBlackRespondents <- subset(NotOutNoneNonBlackRespondents, Frequency!="NA" & Frequency!="")
+
+#Merge the two tables and rename the columns
+NotOutNone <- merge(NotOutNoneBlackRespondents, NotOutNoneNonBlackRespondents, by = 'Frequency')
+
+NotOutNone <- NotOutNone %>% rename("Black Respondents" = "NotOutNone.x", "NonBlack Respondents" = "NotOutNone.y")
+
+
+#Convert to Percentages
+
+NotOutNone$NonBlack_Percentage= 100*(NotOutNone$'NonBlack Respondents'/sum(NotOutNone$'NonBlack Respondents'))
+
+NotOutNone$Black_Percentage= 100*(NotOutNone$'Black Respondents'/sum(NotOutNone$'Black Respondents'))
+
+#Gather the data
+
+NotOutNone_Gathered <- NotOutNone %>%
+gather('NonBlack_Percentage','Black_Percentage',key='Respondent_Group',value='Percentage')
+#Assign Reason
+
+NotOutNone_Gathered$Reason <- c("NotOutNone", "NotOutNone", "NotOutNone", "NotOutNone")
+##Put All The Reasons in One Dataset
+
+Reasons_For_Not_Being_Out <- rbind(NotOutLegal_Gathered, NotOutUnaccept_Gathered, NotOutAfraid_Gathered, NotOutPrivate_Gathered, NotOutDislike_Gathered, NotOutUnnec_Gathered, NotOutQuestioning_Gathered, NotOutTime_Gathered, NotOutNone_Gathered)
+
+##Create A Dataset to be graphed
+Reasons_For_Not_Being_Out_Filtered <- Reasons_For_Not_Being_Out %>% filter(grepl('1', Frequency))
+
+##Create A Graph
+ReasonsNotOutGraph <- ggplot(Reasons_For_Not_Being_Out_Filtered, aes(fill=Respondent_Group, y=Percentage,  x= Reason)) + 
+    geom_bar(position="dodge", stat="identity") + 
+scale_fill_manual(values=c("purple",
+                               "grey"), labels=c('Black Respondents', 'Non-Black Respondents')) + 
+labs(x= "Reasons for Not Being Out") + 
+guides(fill=guide_legend(title="Respondent Group")) + 
+geom_text(aes(label=abbreviate(Percentage)
+), position=position_dodge(width=0.9), vjust=-0.25)+
+ggtitle("Reasons for Not Being Out") +
+ylim(0, 70) +
+theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
+scale_x_discrete("Reason", labels=c(
+"NotOutAfraid" = "I am afraid of repercussions or reactions.", 
+"NotOutDislike" = "I dislike coming out.", 
+"NotOutLegal" = "There are legal consequences.",
+"NotOutNone" = "Nothing prevents me from coming out.", 
+"NotOutPrivate" = "It is private.", 
+"NotOutQuestioning" = "I'm still questioning my identity/orientation.", 
+"NotOutTime" = "I haven't found the right time/occasion.", 
+"NotOutUnaccept" = "It is not acceptable in my community.", 
+"NotOutUnnec" = "I don't think it is necessary."))
+
+#Export as .png with 1000 x 1000 pixels
+```
